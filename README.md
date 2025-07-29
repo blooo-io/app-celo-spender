@@ -1,4 +1,4 @@
-[![Ensure compliance with Ledger guidelines](https://github.com/blooo-io/app-celo-spender/actions/workflows/guidelines_enforcer.yml/badge.svg)](https://github.com/blooo-io/app-celo-spender/actions/workflows/guidelines_enforcer.yml) [![Build and run functional tests using ragger through reusable workflow](https://github.com/blooo-io/app-celo-spender/actions/workflows/build_and_functional_tests.yml/badge.svg?branch=master)](https://github.com/blooo-io/app-celo-spender/actions/workflows/build_and_functional_tests.yml)
+[![Ensure compliance with Ledger guidelines](https://github.com/blooo-io/app-celo-spender/actions/workflows/guidelines_enforcer.yml/badge.svg)](https://github.com/blooo-io/app-celo-spender/actions/workflows/guidelines_enforcer.yml) [![Build and run functional tests using ragger through reusable workflow](https://github.com/blooo-io/app-celo-spender/actions/workflows/build_and_functional_tests.yml/badge.svg?branch=develop)](https://github.com/blooo-io/app-celo-spender/actions/workflows/build_and_functional_tests.yml)
 
 # Celo app for Ledger Wallet
 
