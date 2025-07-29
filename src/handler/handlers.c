@@ -69,10 +69,6 @@ int handler_sign(const command_t *cmd) {
     BEGIN_TRY {
         TRY {
             return handleSign(cmd->p1, cmd->p2, cmd->data, cmd->lc, &flags);
-
-            // if (!(flags & IO_ASYNCH_REPLY)) {
-            //     return io_send_response_pointer(G_io_apdu_buffer, tx, SW_OK);
-            // }
         }
         CATCH_OTHER(e) {
             reset_app_context();

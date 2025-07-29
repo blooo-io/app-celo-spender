@@ -1,25 +1,22 @@
 {
-  "ledgerDevTools.appSettings": {
-    "selectedUseCase": "release",
-    "selectedVariant": "celo",
-    "testsList": [
-      "test_celo_derive_address",
-      "test_celo_get_version",
-      "test_sign_data",
-      "test_sign_transaction_eip1559_no_data",
-      "test_sign_transaction_eip1559_with_data",
-      "test_sign_transaction_cip64",
-      "test_add_cUSD_as_fee_currency"
-    ],
-    "selectedDevice": "Flex"
+  "workbench.colorCustomizations": {
+    "activityBar.activeBackground": "#fdff85",
+    "activityBar.background": "#fdff85",
+    "activityBar.foreground": "#15202b",
+    "activityBar.inactiveForeground": "#15202b99",
+    "activityBarBadge.background": "#00bcbf",
+    "activityBarBadge.foreground": "#15202b",
+    "commandCenter.border": "#15202b99",
+    "sash.hoverBorder": "#fdff85",
+    "statusBar.background": "#fcff52",
+    "statusBar.foreground": "#15202b",
+    "statusBarItem.hoverBackground": "#fbff1f",
+    "statusBarItem.remoteBackground": "#fcff52",
+    "statusBarItem.remoteForeground": "#15202b",
+    "titleBar.activeBackground": "#fcff52",
+    "titleBar.activeForeground": "#15202b",
+    "titleBar.inactiveBackground": "#fcff5299",
+    "titleBar.inactiveForeground": "#15202b99"
   },
-  "files.associations": {
-    "sign_personal_message.h": "c",
-    "get_app_info.h": "c",
-    "get_public_key.h": "c",
-    "get_wallet_id.h": "c",
-    "constants.h": "c",
-    "sw.h": "c",
-    "send_response.h": "c"
-  }
+  "peacock.color": "FCFF52"
 }

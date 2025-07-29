@@ -40,6 +40,7 @@
 
 // Latest includes
 #include "constants.h"
+#include "mem.h"
 
 // Contexts
 dataContext_t dataContext;
@@ -52,13 +53,18 @@ cx_sha3_t sha3;
 volatile uint8_t dataAllowed;
 volatile uint8_t contractDetails;
 volatile bool dataPresent;
+volatile uint8_t verbose_eip712;
+volatile uint8_t blind_signing;
 volatile provision_type_t provisionType;
 
 // Strings
 strings_t strings;
 
+uint16_t apdu_response_code;
+
 // Internal storage
 const internalStorage_t N_storage_real;
+const chain_config_t *chainConfig;
 
 /**
  * Handle APDU command received and send back APDU response using handlers.
@@ -74,21 +80,27 @@ void app_main() {
 
     ui_idle();
 
+    app_mem_init();
+
     // Reset context
     reset_app_context();
-    tmpCtx.transactionContext.currentTokenIndex = 0;
+    tmpCtx.transactionContext.currentAssetIndex = 0;
 
     // Initialize the NVM data if required
     if (N_storage.initialized != 0x01) {
         internalStorage_t storage;
         storage.dataAllowed = 0x00;
         storage.contractDetails = 0x00;
+        storage.verbose_eip712 = 0x00;
+        storage.blind_signing = 0x00;
         storage.initialized = 0x01;
         nvm_write(&N_storage, (void *) &storage, sizeof(internalStorage_t));
     }
 
     dataAllowed = N_storage.dataAllowed;
     contractDetails = N_storage.contractDetails;
+    verbose_eip712 = N_storage.verbose_eip712;
+    blind_signing = N_storage.blind_signing;
 
     for (;;) {
         // Receive command bytes in G_io_apdu_buffer

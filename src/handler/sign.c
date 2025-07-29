@@ -11,6 +11,10 @@
 #include "utils.h"
 #include "ethUtils.h"
 
+#include "gtp_tx_info.h"
+
+static bool g_use_standard_ui;
+
 /**
  * Handles the signing of a transaction.
  *
@@ -27,44 +31,76 @@ int handleSign(uint8_t p1,
                uint16_t dataLength,
                volatile unsigned int *flags) {
     parserStatus_e txResult;
-    if (p1 == P1_FIRST) {
-        if (appState != APP_STATE_IDLE) {
-            reset_app_context();
-        }
+    g_use_standard_ui = (p2 == SIGN_MODE_BASIC);
+    switch (p2) {
+        case SIGN_MODE_BASIC:
+        case SIGN_MODE_STORE:
+            if (p1 == P1_FIRST) {
+                if (appState != APP_STATE_IDLE) {
+                    reset_app_context();
+                }
 
-        if (parse_bip32_path(&tmpCtx.transactionContext.derivationPath, workBuffer, dataLength)) {
-            PRINTF("Invalid path\n");
-            return io_send_sw(SW_ERROR_IN_DATA);
-        }
-        workBuffer += 1 + tmpCtx.transactionContext.derivationPath.len * sizeof(uint32_t);
-        dataLength -= 1 + tmpCtx.transactionContext.derivationPath.len * sizeof(uint32_t);
+                if (parse_bip32_path(&tmpCtx.transactionContext.derivationPath,
+                                     workBuffer,
+                                     dataLength) < 0) {
+                    PRINTF("Invalid path\n");
+                    return io_send_sw(SW_ERROR_IN_DATA);
+                }
+                workBuffer += 1 + tmpCtx.transactionContext.derivationPath.len * sizeof(uint32_t);
+                dataLength -= 1 + tmpCtx.transactionContext.derivationPath.len * sizeof(uint32_t);
 
-        appState = APP_STATE_SIGNING_TX;
-        dataPresent = false;
-        provisionType = PROVISION_NONE;
-        initTx(&txContext, &sha3, &tmpContent.txContent, customProcessor, NULL);
-        // Extract and validate the transaction type
-        uint8_t txType = *workBuffer;
-        if (txType == EIP1559 || txType == CIP64) {
-            // Initialize the SHA3 hashing with the transaction type
-            CX_THROW(cx_hash_no_throw((cx_hash_t *) &sha3, 0, workBuffer, 1, NULL, 0));
-            // Save the transaction type
-            txContext.txType = txType;
-            workBuffer++;
-            dataLength--;
-        } else {
-            return io_send_sw(SW_TX_TYPE_NOT_SUPPORTED);
-        }
-    } else if (p1 != P1_MORE) {
-        return io_send_sw(SW_WRONG_P1_OR_P2);
+                appState = APP_STATE_SIGNING_TX;
+                dataPresent = false;
+                provisionType = PROVISION_NONE;
+                initTx(&txContext,
+                       &sha3,
+                       &tmpContent.txContent,
+                       customProcessor,
+                       p2 == SIGN_MODE_STORE,
+                       NULL);
+
+                // Extract and validate the transaction type
+                uint8_t txType = *workBuffer;
+                if (txType == EIP1559 || txType == CIP64) {
+                    // Initialize the SHA3 hashing with the transaction type
+                    CX_THROW(cx_hash_no_throw((cx_hash_t *) &sha3, 0, workBuffer, 1, NULL, 0));
+                    // Save the transaction type
+                    txContext.txType = txType;
+                    workBuffer++;
+                    dataLength--;
+                } else {
+                    return io_send_sw(SW_TX_TYPE_NOT_SUPPORTED);
+                }
+            } else if (p1 != P1_MORE) {
+                return io_send_sw(SW_WRONG_P1_OR_P2);
+            }
+            if ((p1 == P1_MORE) && (appState != APP_STATE_SIGNING_TX)) {
+                PRINTF("Signature not initialized\n");
+                return io_send_sw(SW_INITIALIZATION_ERROR);
+            }
+            break;
+        case SIGN_MODE_START_FLOW:
+            if (appState != APP_STATE_SIGNING_TX) {
+                PRINTF("Signature not initialized\n");
+                return APDU_RESPONSE_CONDITION_NOT_SATISFIED;
+            }
+            if (dataLength != 0) {
+                return APDU_RESPONSE_INVALID_DATA;
+            }
+            if (!validate_instruction_hash()) {
+                PRINTF("Error: instructions hash mismatch!\n");
+                return APDU_RESPONSE_INVALID_DATA;
+            }
+            if (!ui_gcs()) {
+                return APDU_RESPONSE_INTERNAL_ERROR;
+            }
+            *flags |= IO_ASYNCH_REPLY;
+            return APDU_NO_RESPONSE;
+            break;
+        default:
+            return io_send_sw(SW_WRONG_P1_OR_P2);
     }
-    if (p2 != 0) {
-        return io_send_sw(SW_WRONG_P1_OR_P2);
-    }
-    if ((p1 == P1_MORE) && (appState != APP_STATE_SIGNING_TX)) {
-        PRINTF("Signature not initialized\n");
-        return io_send_sw(SW_INITIALIZATION_ERROR);
-    }
+
     if (txContext.currentField == RLP_NONE) {
         PRINTF("Parser not initialized\n");
         return io_send_sw(SW_INITIALIZATION_ERROR);
@@ -84,10 +120,11 @@ int handleSign(uint8_t p1,
             return io_send_sw(SW_ERROR_IN_DATA);
     }
 
+    if (txResult == USTREAM_FINISHED) {
+        finalizeParsing(true, g_use_standard_ui);
+    }
+
     *flags |= IO_ASYNCH_REPLY;
 
-    if (txResult == USTREAM_FINISHED) {
-        finalizeParsing(true);
-    }
     return 0;
 }

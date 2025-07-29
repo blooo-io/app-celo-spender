@@ -10,13 +10,6 @@
 #include "types.h"
 
 /**
- * @brief Sends the status code to the SE proxy hardware abstraction layer.
- *
- * @param sw The status code to be sent.
- */
-void io_seproxyhal_send_status(uint32_t sw);
-
-/**
  * @brief Formats the signature output.
  *
  * @param signature The signature to be formatted.
@@ -38,6 +31,14 @@ void reset_app_context();
 tokenDefinition_t *getKnownToken(uint8_t *tokenAddr);
 
 /**
+ * @brief Retrieves the index of a token based on its address.
+ *
+ * @param addr The address of the token.
+ * @return The index of the token. -1 if not found.
+ */
+int get_token_index_by_addr(const uint8_t *addr);
+
+/**
  * @brief Custom processor for transaction context.
  *
  * @param context The transaction context.
@@ -52,19 +53,22 @@ customStatus_e customProcessor(txContext_t *context);
  * @param sha3 The SHA3 context.
  * @param content The transaction content.
  * @param customProcessor The custom processor function.
+ * @param store_calldata Flag indicating if the calldata should be stored.
  * @param extra Additional data for the custom processor.
  */
 void initTx(txContext_t *context,
             cx_sha3_t *sha3,
             txContent_t *content,
             ustreamProcess_t customProcessor,
+            bool store_calldata,
             void *extra);
 
 /**
  * @brief Finalizes the parsing process.
  *
  * @param direct Flag indicating if the parsing is direct.
+ * @param use_standard_ui Flag indicating if the standard UI should be used.
  */
-void finalizeParsing(bool direct);
+void finalizeParsing(bool direct, bool use_standard_ui);
 
 extern volatile uint8_t appState; /**< The application state. */
