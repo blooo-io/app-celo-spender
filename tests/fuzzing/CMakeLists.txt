@@ -220,6 +220,7 @@ FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src_features/provide_tx_simulation/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/signAuthorizationEIP7702/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/provide_safe_account/*.c
+  ${CMAKE_SOURCE_DIR}/../../src_common/*.c
   ${CMAKE_SOURCE_DIR}/../../src/list.c
   ${CMAKE_SOURCE_DIR}/../../src_nbgl/ui_utils.c
   ${CMAKE_SOURCE_DIR}/../../src/mem.c
@@ -234,8 +235,12 @@ FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src/utils.c
   ${CMAKE_SOURCE_DIR}/../../src/manage_asset_info.c
   ${CMAKE_SOURCE_DIR}/../../src/hash_bytes.c
-  ${CMAKE_SOURCE_DIR}/../../src_common/*.c
-  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712/ui_logic.c  
+  ${CMAKE_SOURCE_DIR}/../../src/ui/*.c
+  ${CMAKE_SOURCE_DIR}/../../src/apdu/*.c
+  ${CMAKE_SOURCE_DIR}/../../src/handler/*.c
+  ${CMAKE_SOURCE_DIR}/../../src/helper/*.c
+
+
 )
 
 add_executable(fuzzer src/fuzzer.c ${SDK_STD_SOURCES} ${SOURCES})
