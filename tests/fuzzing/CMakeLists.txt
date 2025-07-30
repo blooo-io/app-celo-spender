@@ -237,10 +237,10 @@ FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src/utils.c
   ${CMAKE_SOURCE_DIR}/../../src/manage_asset_info.c
   ${CMAKE_SOURCE_DIR}/../../src/hash_bytes.c
-  ${CMAKE_SOURCE_DIR}/../../src/ui/*.c
-  ${CMAKE_SOURCE_DIR}/../../src/apdu/*.c
-  ${CMAKE_SOURCE_DIR}/../../src/handler/*.c
-  ${CMAKE_SOURCE_DIR}/../../src/helper/*.c
+  # ${CMAKE_SOURCE_DIR}/../../src/ui/*.c
+  # ${CMAKE_SOURCE_DIR}/../../src/apdu/*.c
+  # ${CMAKE_SOURCE_DIR}/../../src/handler/*.c
+  # ${CMAKE_SOURCE_DIR}/../../src/helper/*.c
 
 
 )
