@@ -160,12 +160,15 @@ set(DEFINES
 
 add_compile_definitions(${DEFINES})
 
+# Sdk sources collection
 FILE(
   GLOB_RECURSE SDK_STD_SOURCES
   ${BOLOS_SDK}/lib_standard_app/*.c
   ${CMAKE_SOURCE_DIR}/../../ethereum-plugin-sdk/src/*.c
   ./src/mock.c
 )
+
+# excluded files from sdk sources collection
 list(
   REMOVE_ITEM SDK_STD_SOURCES
   ${BOLOS_SDK}/lib_standard_app/io.c
@@ -174,6 +177,7 @@ list(
   ${BOLOS_SDK}/lib_standard_app/crypto_helpers.c
 )
 
+# app header collection (tells compiler where to find header files)
 include_directories(
   ${CMAKE_SOURCE_DIR}/../../ethereum-plugin-sdk/src/
   ${CMAKE_SOURCE_DIR}/../../src
@@ -185,16 +189,9 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/../../src_features/generic_tx_parser/
   ${CMAKE_SOURCE_DIR}/../../src_features/getPublicKey/
   ${CMAKE_SOURCE_DIR}/../../src_features/provide_enum_value/
-  ${CMAKE_SOURCE_DIR}/../../src_features/provide_network_info/
-  ${CMAKE_SOURCE_DIR}/../../src_features/signTx/
-  ${CMAKE_SOURCE_DIR}/../../src_features/provide_trusted_name/
-  ${CMAKE_SOURCE_DIR}/../../src_features/getChallenge/
   ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712/
-  ${CMAKE_SOURCE_DIR}/../../src_features/provide_proxy_info/
-  ${CMAKE_SOURCE_DIR}/../../src_features/provide_tx_simulation/
-  ${CMAKE_SOURCE_DIR}/../../src_features/signAuthorizationEIP7702/
-  ${CMAKE_SOURCE_DIR}/../../src_features/provide_safe_account/
-  ${CMAKE_SOURCE_DIR}/../../src_nbgl/
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712_common/
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712v0/
   ${BOLOS_SDK}/include
   ${BOLOS_SDK}/target/${TARGET_DEVICE}/include
   ${BOLOS_SDK}/io/include
@@ -208,6 +205,7 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/src/
 )
 
+# app sources collection (tells compiler where to find source files)
 FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src_features/generic_tx_parser/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712/*.c
