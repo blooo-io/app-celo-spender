@@ -208,6 +208,9 @@ include_directories(
 
 FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src_features/generic_tx_parser/*.c
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712/*.c
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712_v0/*.c
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712_common/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/provide_trusted_name/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/getChallenge/*.c
   ${CMAKE_SOURCE_DIR}/../../src_features/provide_enum_value/*.c
