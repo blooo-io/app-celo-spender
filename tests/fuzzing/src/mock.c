@@ -335,7 +335,7 @@ void mem_free(mem_ctx_t ctx, void *ptr) {
 }
 
 // km: to see if it works as expected
-void os_longjmp(int value) {
+void os_longjmp(unsigned int exception) __attribute__((noreturn)) {
     // Mock implementation - could just exit or return
-    exit(value);
+    exit(exception);
 }
