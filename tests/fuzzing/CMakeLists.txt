@@ -177,8 +177,10 @@ list(
 include_directories(
   ${CMAKE_SOURCE_DIR}/../../ethereum-plugin-sdk/src/
   ${CMAKE_SOURCE_DIR}/../../src
-  ${CMAKE_SOURCE_DIR}/../../src/helper
+  ${CMAKE_SOURCE_DIR}/../../src/apdu
   ${CMAKE_SOURCE_DIR}/../../src/handler
+  ${CMAKE_SOURCE_DIR}/../../src/helper
+  ${CMAKE_SOURCE_DIR}/../../src/ui
   ${CMAKE_SOURCE_DIR}/../../src_common
   ${CMAKE_SOURCE_DIR}/../../src_features/generic_tx_parser/
   ${CMAKE_SOURCE_DIR}/../../src_features/getPublicKey/
