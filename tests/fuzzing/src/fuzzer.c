@@ -25,6 +25,10 @@
 
 // #include "shared_context.h"
 #include "tlv.h"
+#include "globals.h"
+#include "sw.h"
+#include "send_response.h"
+
 // #include "apdu_constants.h"
 
 #include "nbgl_use_case.h"
