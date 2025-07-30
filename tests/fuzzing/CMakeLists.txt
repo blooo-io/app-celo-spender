@@ -231,6 +231,8 @@ FILE(GLOB_RECURSE SOURCES
   ${CMAKE_SOURCE_DIR}/../../src/utils.c
   ${CMAKE_SOURCE_DIR}/../../src/manage_asset_info.c
   ${CMAKE_SOURCE_DIR}/../../src/hash_bytes.c
+  ${CMAKE_SOURCE_DIR}/../../src_common/*.c
+  ${CMAKE_SOURCE_DIR}/../../src_features/signMessageEIP712/ui_logic.c  
 )
 
 add_executable(fuzzer src/fuzzer.c ${SDK_STD_SOURCES} ${SOURCES})

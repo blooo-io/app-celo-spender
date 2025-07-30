@@ -333,3 +333,9 @@ void mem_free(mem_ctx_t ctx, void *ptr) {
     (void) ctx;
     free(ptr);
 }
+
+// km: to see if it works as expected
+void os_longjmp(int value) {
+    // Mock implementation - could just exit or return
+    exit(value);
+}
