@@ -34,7 +34,6 @@ void handleGetAppConfiguration(uint8_t p1,
     G_io_apdu_buffer[2] = MINOR_VERSION;
     G_io_apdu_buffer[3] = PATCH_VERSION;
     *tx = 4;
-    THROW(SW_OK);
 }
 
 /**
