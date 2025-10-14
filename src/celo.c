@@ -61,21 +61,6 @@ tokenDefinition_t *getKnownTokenLegacy(uint8_t *tokenAddr) {
            tokenAddr[0], tokenAddr[1], tokenAddr[18], tokenAddr[19]);
     // Legacy function that tries to find token without chain ID constraint
     // Returns the first match found
-
-    // Print all tokens in transactionContext.assetSet for debugging
-    PRINTF("DEBUG: Known tokens in transactionContext.assetSet:\n");
-    for (int i = 0; i < MAX_ASSETS; i++) {
-        if (tmpCtx.transactionContext.assetSet[i]) {
-            tokenDefinition_t *tok = &tmpCtx.transactionContext.extraInfo[i].token;
-            PRINTF("  [%d] Address: %02X%02X...%02X%02X, Ticker: %s, Decimals: %u, Chain ID: %u\n",
-                   i, 
-                   tok->address[0], tok->address[1], tok->address[18], tok->address[19],
-                   tok->ticker, tok->decimals, (uint32_t)tok->chain_id);
-        }
-    }
-    // Print the token address received in the transaction (the one being looked up)
-    PRINTF("DEBUG: Token address in tx for lookup: %02X%02X...%02X%02X\n",
-           tokenAddr[0], tokenAddr[1], tokenAddr[18], tokenAddr[19]);
     
     for (int i = 0; i < MAX_ASSETS; i++) {
         if (tmpCtx.transactionContext.assetSet[i] &&
