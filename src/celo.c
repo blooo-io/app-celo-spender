@@ -89,6 +89,27 @@ tokenDefinition_t *getKnownTokenLegacy(uint8_t *tokenAddr) {
     return NULL;
 }
 
+/**
+ * @brief Gets the current transaction chain ID from the transaction content.
+ *
+ * @return The chain ID as uint64_t, or 0 if not available.
+ */
+uint64_t getCurrentTransactionChainId(void) {
+    if (tmpContent.txContent.vLength == 0) {
+        PRINTF("DEBUG: No transaction chain ID available\n");
+        return 0;
+    }
+    
+    // Convert chain ID from v field to uint64_t
+    uint64_t chainId = 0;
+    for (uint32_t i = 0; i < tmpContent.txContent.vLength && i < 4; i++) {
+        chainId = (chainId << 8) | tmpContent.txContent.v[i];
+    }
+    
+    PRINTF("DEBUG: Current transaction chain ID: %u (0x%08X)\n", (uint32_t)chainId, (uint32_t)chainId);
+    return chainId;
+}
+
 int get_token_index_by_addr(const uint8_t *addr, uint64_t chainId) {
     PRINTF("DEBUG: get_token_index_by_addr() called - Address: %02X%02X...%02X%02X, Chain ID: %u\n", 
            addr[0], addr[1], addr[18], addr[19], (uint32_t)chainId);
@@ -154,7 +175,7 @@ customStatus_e customProcessor(txContext_t *context) {
                   (memcmp(context->workBuffer, TOKEN_TRANSFER_ID, 4) == 0)) ||
                  ((context->currentFieldLength >= sizeof(dataContext.tokenContext.data)) &&
                   (memcmp(context->workBuffer, TOKEN_TRANSFER_WITH_COMMENT_ID, 4) == 0))) &&
-                (getKnownTokenLegacy(tmpContent.txContent.destination) != NULL)) {
+                (getKnownToken(tmpContent.txContent.destination, getCurrentTransactionChainId()) != NULL)) {
                 provisionType = PROVISION_TOKEN;
             }
             // Initial check to see if the lock content can be processed
@@ -357,7 +378,7 @@ void finalizeParsing(bool direct, bool use_standard_ui) {
 
     // Display correct currency if fee currency field sent
     if (tmpContent.txContent.feeCurrencyLength != 0) {
-        tokenDefinition_t *feeCurrencyToken = getKnownTokenLegacy(tmpContent.txContent.feeCurrency);
+        tokenDefinition_t *feeCurrencyToken = getKnownToken(tmpContent.txContent.feeCurrency, getCurrentTransactionChainId());
         // display the ticker of the fee currency token
         if (feeCurrencyToken == NULL) {
             reset_app_context();
@@ -378,7 +399,7 @@ void finalizeParsing(bool direct, bool use_standard_ui) {
     if (use_standard_ui) {
         // If there is a token to process, check if it is well known
         if (provisionType == PROVISION_TOKEN) {
-            tokenDefinition_t *currentToken = getKnownTokenLegacy(tmpContent.txContent.destination);
+            tokenDefinition_t *currentToken = getKnownToken(tmpContent.txContent.destination, getCurrentTransactionChainId());
             if (currentToken != NULL) {
                 dataPresent = false;
                 decimals = currentToken->decimals;

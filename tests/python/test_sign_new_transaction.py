@@ -158,7 +158,7 @@ def test_sign_transaction_cip64_with_sepolia_chain_id(
 ):
     test_add_cEUR_as_fee_currency_sepolia_chain(backend)
 
-    rawTx = "7bf84382a4ec8084773594008503a11f9db58301688c94da52c9ffebd4d54c94a072776126069d43e74f9e8080c094a99dc247d6b7b2e3ab48a1fee101b83cd6acd82a018080"
+    rawTx = "7bf84483aa044c8084773594008503a11f9db58301688c94da52c9ffebd4d54c94a072776126069d43e74f9e8080c094a99dc247d6b7b2e3ab48a1fee101b83cd6acd82a018080"
     instruction = get_nano_review_instructions(4) if firmware.is_nano else []
     response = sign_transaction_with_rawTx(
         test_name, backend, scenario_navigator, navigator, rawTx, instruction
@@ -167,5 +167,5 @@ def test_sign_transaction_cip64_with_sepolia_chain_id(
     assert response.data[0] == 0x01 or response.data[0] == 0x00
     assert (
         response.data.hex()
-        == "01f26131340fff1d2e114c9459baa0d910eef5d17bba5f075fb0e6f66becc825871f3a08d0a7b26b57e58c051b103f307519dce0029f14a356ec2a34c747fb569c"
+        == "01e8ef83018bca55c0cf6d58631e6ea3292b254a698062b9cb79f45f878701f06e0589467e81afee6704f97e81582a3c18264923afc1603404e95cb5b0797f8856"
     )

@@ -49,6 +49,13 @@ int get_token_index_by_addr(const uint8_t *addr, uint64_t chainId);
 tokenDefinition_t *getKnownTokenLegacy(uint8_t *tokenAddr);
 
 /**
+ * @brief Gets the current transaction chain ID from the transaction content.
+ *
+ * @return The chain ID as uint64_t, or 0 if not available.
+ */
+uint64_t getCurrentTransactionChainId(void);
+
+/**
  * @brief Custom processor for transaction context.
  *
  * @param context The transaction context.
