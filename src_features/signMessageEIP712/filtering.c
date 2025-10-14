@@ -520,10 +520,15 @@ bool filtering_amount_join_value(const uint8_t *payload,
     // Handling
     if (token_idx == TOKEN_IDX_ADDR_IN_DOMAIN) {
         // Permit (ERC-2612)
-        int resolved_idx = get_token_index_by_addr(eip712_context->contract_addr);
+        PRINTF("DEBUG: EIP712 filtering - looking up token with address %02X%02X...%02X%02X (chain ID=0, legacy mode)\n",
+               eip712_context->contract_addr[0], eip712_context->contract_addr[1],
+               eip712_context->contract_addr[18], eip712_context->contract_addr[19]);
+        int resolved_idx = get_token_index_by_addr(eip712_context->contract_addr, 0);
         if (resolved_idx == -1) {
+            PRINTF("DEBUG: EIP712 token lookup failed\n");
             return false;
         }
+        PRINTF("DEBUG: EIP712 token found at index %d\n", resolved_idx);
         token_idx = (uint8_t) resolved_idx;
         // simulate as if we had received a token-join addr
         ui_712_token_join_prepare_addr_check(token_idx);

@@ -323,6 +323,12 @@ static bool processFeeCurrency(txContext_t *context) {
     }
     if (context->currentFieldPos == context->currentFieldLength) {
         context->content->feeCurrencyLength = context->currentFieldLength;
+        // Print the feeCurrency value in hex
+        PRINTF("feeCurrency (len: %u): ", context->content->feeCurrencyLength);
+        for (uint32_t i = 0; i < context->content->feeCurrencyLength; i++) {
+            PRINTF("%02X", context->content->feeCurrency[i]);
+        }
+        PRINTF("\n");
         context->currentField++;
         context->processingField = false;
     }
@@ -474,22 +480,28 @@ static bool processAndDiscard(txContext_t *context) {
     }
     return false;
 }
-#define NUM_CHAIN_IDS 3
-// Mainnet, Alfajores, Baklava,
-static const uint16_t AUTHORIZED_CHAIN_IDS[NUM_CHAIN_IDS] = {42220, 44787, 17323};
+#define NUM_CHAIN_IDS 4
+// Mainnet, Alfajores, Baklava, Sepolia
+static const uint32_t AUTHORIZED_CHAIN_IDS[NUM_CHAIN_IDS] = {42220, 44787, 17323, 11142220};
 
 /**
  * @brief Checks if the given chain ID is authorized.
  *
  * @param[in] chainID The chain ID to check.
+ * @param[in] length The actual length of the chain ID data.
  *
  * @return 1 if authorized, 0 otherwise.
  */
-static int isChainIDAuthorized(uint8_t chainID[4]) {
+static int isChainIDAuthorized(uint8_t chainID[4], uint32_t length) {
     if (chainID == NULL) {
         return 0;
     }
-    uint16_t chainIDInt = (chainID[0] << 8) | chainID[1];
+    // Construct chainID from the specified number of bytes
+    uint32_t chainIDInt = 0;
+    for (uint32_t i = 0; i < length && i < 4; i++) {
+        chainIDInt = (chainIDInt << 8) | chainID[i];
+    }
+    PRINTF("chainIDInt = %u\n", chainIDInt);
     for (int i = 0; i < NUM_CHAIN_IDS; i++) {
         if (chainIDInt == AUTHORIZED_CHAIN_IDS[i]) {
             return 1;
@@ -526,7 +538,9 @@ static bool processV(txContext_t *context) {
         if (copyTxData(context, context->content->v + context->currentFieldPos, copySize)) {
             return true;
         }
-        if (!isChainIDAuthorized(context->content->v)) {
+        PRINTF("context->currentFieldLength = %u\n", context->currentFieldLength);
+        PRINTF("context->content->vLength = %u\n", context->content->vLength);
+        if (!isChainIDAuthorized(context->content->v, context->currentFieldLength)) {
             PRINTF("ChainID not authorized\n");
             return true;
         }

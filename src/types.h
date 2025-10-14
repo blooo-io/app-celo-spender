@@ -43,6 +43,7 @@ typedef struct tokenDefinition_t {
     uint8_t address[ADDRESS_LENGTH];  // must be first item
     char ticker[MAX_TICKER_LEN];
     uint8_t decimals;
+    uint64_t chain_id;  // Chain ID for the token
 } tokenDefinition_t;
 
 // UNION

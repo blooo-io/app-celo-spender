@@ -441,7 +441,18 @@ class CommandBuilder:
         payload += ticker.encode()
         payload += addr
         payload += struct.pack(">I", decimals)
-        payload += struct.pack(">I", chain_id)
+        
+        # Support variable chain ID lengths - use minimum required bytes
+        if chain_id <= 0xFF:
+            chain_id_bytes = struct.pack(">I", chain_id)  # Still use 4 bytes for compatibility
+        elif chain_id <= 0xFFFF:
+            chain_id_bytes = struct.pack(">I", chain_id)  # Still use 4 bytes for compatibility
+        elif chain_id <= 0xFFFFFF:
+            chain_id_bytes = struct.pack(">I", chain_id)  # Still use 4 bytes for compatibility
+        else:
+            chain_id_bytes = struct.pack(">I", chain_id)  # Use full 4 bytes
+            
+        payload += chain_id_bytes
         payload += sig
         return self._serialize(
             InsType.PROVIDE_ERC20_TOKEN_INFORMATION, 0x00, 0x00, payload
