@@ -87,6 +87,10 @@ ENABLE_NBGL_QRCODE = 1
 #ENABLE_NBGL_KEYBOARD = 1
 #ENABLE_NBGL_KEYPAD = 1
 
+########################################
+#            Swap features             #
+########################################
+ENABLE_SWAP = 1
 
 ########################################
 #          Features disablers          #
