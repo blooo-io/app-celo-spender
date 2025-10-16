@@ -27,8 +27,8 @@ APPNAME = "Celo"
 
 # Application version
 APPVERSION_M = 1
-APPVERSION_N = 4
-APPVERSION_P = 1
+APPVERSION_N = 5
+APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
@@ -36,10 +36,10 @@ APP_SOURCE_PATH += src_features src_common src
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
-ICON_NANOX = nanox_app_celo.gif
-ICON_NANOSP = nanox_app_celo.gif
-ICON_STAX = stax_app_celo.gif
-ICON_FLEX = flex_app_celo.gif
+ICON_NANOX = icons/nanox_app_celo.gif
+ICON_NANOSP = icons/nanox_app_celo.gif
+ICON_STAX = icons/stax_app_celo.gif
+ICON_FLEX = icons/flex_app_celo.gif
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1

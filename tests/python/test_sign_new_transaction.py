@@ -41,7 +41,6 @@ def test_sign_transaction_eip1559_no_data(
 ):
 
     rawTx = "02f86c82aef380830f42408506fc35fb8082520894da52c9ffebd4d54c94a072776126069d43e74f9e8080c080a099059ce0f1fe1f4fe27a583a6fd6a12274780d358f332d6e5901953900b8fb22a046ce6d625369fdc8a521c22793d188afbf61500cd3095fc09b761b518560f101"
-    print("KM -- firmware: ", firmware)
     instruction = get_nano_review_instructions(4) if firmware.is_nano else []
     response = sign_transaction_with_rawTx(
         test_name,
@@ -57,6 +56,29 @@ def test_sign_transaction_eip1559_no_data(
     assert (
         response.data.hex()
         == "014bef650dcad77df8f5cb9385fca75612d3ba5abd1cae4781f1970e67a0ca19af3a4c9485d7e006c45e6907a698fd9cb1b77b162ad1f93d038985a897b32e0db9"
+    )
+
+# @pytest.mark.active_test_scope
+def test_sign_transaction_eip1559_no_data_with_sepolia_chain_id(
+    test_name, backend, scenario_navigator, navigator, firmware
+):
+
+    rawTx = "02f86e8400aa044c80830f42408506fc35fb8082520894da52c9ffebd4d54c94a072776126069d43e74f9e8080c080a099059ce0f1fe1f4fe27a583a6fd6a12274780d358f332d6e5901953900b8fb22a046ce6d625369fdc8a521c22793d188afbf61500cd3095fc09b761b518560f101"
+    instruction = get_nano_review_instructions(4) if firmware.is_nano else []
+    response = sign_transaction_with_rawTx(
+        test_name,
+        backend,
+        scenario_navigator,
+        navigator,
+        rawTx,
+        instruction,
+    )
+
+    assert response.status == StatusCode.STATUS_OK
+    assert response.data[0] == 0x01 or response.data[0] == 0x00
+    assert (
+        response.data.hex()
+        == "00f8d6357adcbfb188c646ad762ce2683a565ddc71165d84eb70eed6a3988139db3d31a80d1f73c9bc8719d6131d88afed123aeec7a8b8ee1bc108d3bdf6bb3d79"
     )
 
 
@@ -84,6 +106,34 @@ def test_add_cUSD_as_fee_currency(backend):
     assert response.status == StatusCode.STATUS_OK
 
 
+# @pytest.mark.active_test_scope  
+def test_add_cEUR_as_fee_currency_sepolia_chain(backend):
+    """Test adding s cEUR token with Sepolia chain ID (11142220)"""
+    celo = CeloClient(backend)
+    # Format: [ticker_len][ticker][address][decimals][chain_id][signature]
+    # ticker_len: 06 (6 bytes for "s cEUR")
+    # ticker: 732063455552 ("s cEUR" in hex)
+    # address: a99dc247d6b7b2e3ab48a1fee101b83cd6acd82a (20 bytes)
+    # decimals: 00000012 (18 in big-endian, 4 bytes)
+    # chain_id: 00aa044c (11142220 in big-endian, 4 bytes) - Sepolia chain ID
+    # signature: 304402202724d7679c101264187b7fe981b104a010e139121319d8ea69cf70312846cea202206b0cf908c9594fdec40a5499e606f1ab98fca98b7b62ebf36066c00e0a7d5591
+    data = (
+        "06732063455552"  # hex for ticker_len + "s cEUR"
+        "a99dc247d6b7b2e3ab48a1fee101b83cd6acd82a"
+        "00000012"
+        "00aa044c"
+        "304402202724d7679c101264187b7fe981b104a010e139121319d8ea69cf70312846cea202206b0cf908c9594fdec40a5499e606f1ab98fca98b7b62ebf36066c00e0a7d5591"
+    )
+    encoded_data = bytes.fromhex(data)
+    with celo.send_in_chunk_async(
+        INS.INS_PROVIDE_ERC20_TOKEN_INFORMATION, encoded_data
+    ):
+        pass
+
+    response: bytes = get_async_response(backend)
+    assert response.status == StatusCode.STATUS_OK
+
+
 # @pytest.mark.active_test_scope
 def test_sign_transaction_cip64(
     test_name, backend, scenario_navigator, navigator, firmware
@@ -100,4 +150,22 @@ def test_sign_transaction_cip64(
     assert (
         response.data.hex()
         == "015b39e09e1ef6dd34d140cb3ee9e621c0de28aa0fd965b6b843a1838bdab18d855bb7c01e103beaac3ee3d76fa80bf6167796a33890c8226ac2ccd7ad844a41ab"
+    )
+
+# @pytest.mark.active_test_scope
+def test_sign_transaction_cip64_with_sepolia_chain_id(
+    test_name, backend, scenario_navigator, navigator, firmware
+):
+    test_add_cEUR_as_fee_currency_sepolia_chain(backend)
+
+    rawTx = "7bf84483aa044c8084773594008503a11f9db58301688c94da52c9ffebd4d54c94a072776126069d43e74f9e8080c094a99dc247d6b7b2e3ab48a1fee101b83cd6acd82a018080"
+    instruction = get_nano_review_instructions(4) if firmware.is_nano else []
+    response = sign_transaction_with_rawTx(
+        test_name, backend, scenario_navigator, navigator, rawTx, instruction
+    )
+    assert response.status == StatusCode.STATUS_OK
+    assert response.data[0] == 0x01 or response.data[0] == 0x00
+    assert (
+        response.data.hex()
+        == "01e8ef83018bca55c0cf6d58631e6ea3292b254a698062b9cb79f45f878701f06e0589467e81afee6704f97e81582a3c18264923afc1603404e95cb5b0797f8856"
     )

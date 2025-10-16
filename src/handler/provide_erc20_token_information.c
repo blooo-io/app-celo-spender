@@ -87,7 +87,20 @@ void handleProvideErc20TokenInformation(uint8_t p1,
     offset += 4;
     dataLength -= 4;
 
-    // Skip chainId
+    // Read and store chainId instead of skipping it
+    uint64_t chain_id = U4BE(workBuffer, offset);
+    token->chain_id = chain_id;
+    PRINTF("DEBUG: Parsed chain ID: %u (0x%08X)\n", (uint32_t) chain_id, (uint32_t) chain_id);
+    PRINTF(
+        "DEBUG: Token stored - Address: %02X%02X...%02X%02X, Ticker: %s, Decimals: %u, Chain ID: "
+        "%u\n",
+        token->address[0],
+        token->address[1],
+        token->address[18],
+        token->address[19],
+        token->ticker,
+        token->decimals,
+        (uint32_t) token->chain_id);
     offset += 4;
     dataLength -= 4;
     CX_THROW(cx_ecfp_init_public_key_no_throw(CX_CURVE_256K1,

@@ -43,16 +43,78 @@ void reset_app_context() {
 
 #define WEI_TO_ETHER 18
 
-tokenDefinition_t *getKnownToken(uint8_t *tokenAddr) {
-    int index = get_token_index_by_addr(tokenAddr);
+tokenDefinition_t *getKnownToken(uint8_t *tokenAddr, uint64_t chainId) {
+    PRINTF("DEBUG: getKnownToken() called - Address: %02X%02X...%02X%02X, Chain ID: %u\n",
+           tokenAddr[0],
+           tokenAddr[1],
+           tokenAddr[18],
+           tokenAddr[19],
+           (uint32_t) chainId);
+    int index = get_token_index_by_addr(tokenAddr, chainId);
     if (index == -1) {
+        PRINTF("DEBUG: Token not found\n");
         return NULL;
     }
 
+    PRINTF("DEBUG: Token found at index %d\n", index);
     return &tmpCtx.transactionContext.extraInfo[index].token;
 }
 
-int get_token_index_by_addr(const uint8_t *addr) {
+tokenDefinition_t *getKnownTokenLegacy(uint8_t *tokenAddr) {
+    PRINTF(
+        "DEBUG: getKnownTokenLegacy() called - Address: %02X%02X...%02X%02X (ignoring chain ID)\n",
+        tokenAddr[0],
+        tokenAddr[1],
+        tokenAddr[18],
+        tokenAddr[19]);
+    // Legacy function that tries to find token without chain ID constraint
+    // Returns the first match found
+
+    for (int i = 0; i < MAX_ASSETS; i++) {
+        if (tmpCtx.transactionContext.assetSet[i] &&
+            (memcmp(tmpCtx.transactionContext.extraInfo[i].token.address,
+                    tokenAddr,
+                    ADDRESS_LENGTH) == 0)) {
+            PRINTF("DEBUG: Legacy token found at index %d (Chain ID: %u)\n",
+                   i,
+                   (uint32_t) tmpCtx.transactionContext.extraInfo[i].token.chain_id);
+            return &tmpCtx.transactionContext.extraInfo[i].token;
+        }
+    }
+    PRINTF("DEBUG: Legacy token not found\n");
+    return NULL;
+}
+
+/**
+ * @brief Gets the current transaction chain ID from the transaction content.
+ *
+ * @return The chain ID as uint64_t, or 0 if not available.
+ */
+uint64_t getCurrentTransactionChainId(void) {
+    if (tmpContent.txContent.vLength == 0) {
+        PRINTF("DEBUG: No transaction chain ID available\n");
+        return 0;
+    }
+
+    // Convert chain ID from v field to uint64_t
+    uint64_t chainId = 0;
+    for (uint32_t i = 0; i < tmpContent.txContent.vLength && i < 4; i++) {
+        chainId = (chainId << 8) | tmpContent.txContent.v[i];
+    }
+
+    PRINTF("DEBUG: Current transaction chain ID: %u (0x%08X)\n",
+           (uint32_t) chainId,
+           (uint32_t) chainId);
+    return chainId;
+}
+
+int get_token_index_by_addr(const uint8_t *addr, uint64_t chainId) {
+    PRINTF("DEBUG: get_token_index_by_addr() called - Address: %02X%02X...%02X%02X, Chain ID: %u\n",
+           addr[0],
+           addr[1],
+           addr[18],
+           addr[19],
+           (uint32_t) chainId);
     for (int i = 0; i < MAX_ASSETS; i++) {
         for (int j = 0; j < ADDRESS_LENGTH; j++) {
             PRINTF("%02x", tmpCtx.transactionContext.extraInfo[i].token.address[j]);
@@ -62,10 +124,21 @@ int get_token_index_by_addr(const uint8_t *addr) {
         if (tmpCtx.transactionContext.assetSet[i] &&
             (memcmp(tmpCtx.transactionContext.extraInfo[i].token.address, addr, ADDRESS_LENGTH) ==
              0)) {
-            PRINTF("Token found at index %d\n", i);
-            return i;
+            PRINTF(
+                "DEBUG: Address match found at index %d (stored chain ID: %u, looking for: %u)\n",
+                i,
+                (uint32_t) tmpCtx.transactionContext.extraInfo[i].token.chain_id,
+                (uint32_t) chainId);
+            // If chainId is 0, use legacy behavior (ignore chain ID)
+            if (chainId == 0 || tmpCtx.transactionContext.extraInfo[i].token.chain_id == chainId) {
+                PRINTF("DEBUG: Chain ID match! Token found at index %d\n", i);
+                return i;
+            } else {
+                PRINTF("DEBUG: Chain ID mismatch - continuing search\n");
+            }
         }
     }
+    PRINTF("DEBUG: Token not found in get_token_index_by_addr\n");
     return -1;
 }
 
@@ -108,7 +181,8 @@ customStatus_e customProcessor(txContext_t *context) {
                   (memcmp(context->workBuffer, TOKEN_TRANSFER_ID, 4) == 0)) ||
                  ((context->currentFieldLength >= sizeof(dataContext.tokenContext.data)) &&
                   (memcmp(context->workBuffer, TOKEN_TRANSFER_WITH_COMMENT_ID, 4) == 0))) &&
-                (getKnownToken(tmpContent.txContent.destination) != NULL)) {
+                (getKnownToken(tmpContent.txContent.destination, getCurrentTransactionChainId()) !=
+                 NULL)) {
                 provisionType = PROVISION_TOKEN;
             }
             // Initial check to see if the lock content can be processed
@@ -311,7 +385,8 @@ void finalizeParsing(bool direct, bool use_standard_ui) {
 
     // Display correct currency if fee currency field sent
     if (tmpContent.txContent.feeCurrencyLength != 0) {
-        tokenDefinition_t *feeCurrencyToken = getKnownToken(tmpContent.txContent.feeCurrency);
+        tokenDefinition_t *feeCurrencyToken =
+            getKnownToken(tmpContent.txContent.feeCurrency, getCurrentTransactionChainId());
         // display the ticker of the fee currency token
         if (feeCurrencyToken == NULL) {
             reset_app_context();
@@ -332,7 +407,8 @@ void finalizeParsing(bool direct, bool use_standard_ui) {
     if (use_standard_ui) {
         // If there is a token to process, check if it is well known
         if (provisionType == PROVISION_TOKEN) {
-            tokenDefinition_t *currentToken = getKnownToken(tmpContent.txContent.destination);
+            tokenDefinition_t *currentToken =
+                getKnownToken(tmpContent.txContent.destination, getCurrentTransactionChainId());
             if (currentToken != NULL) {
                 dataPresent = false;
                 decimals = currentToken->decimals;
