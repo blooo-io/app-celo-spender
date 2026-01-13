@@ -32,7 +32,7 @@ APPVERSION_P = 0
 APPVERSION = "$(APPVERSION_M).$(APPVERSION_N).$(APPVERSION_P)"
 
 # Application source files
-APP_SOURCE_PATH += src_features src_common src
+APP_SOURCE_PATH += src src_common src_features
 
 # Application icons following guidelines:
 # https://developers.ledger.com/docs/embedded-app/design-requirements/#device-icon
@@ -40,6 +40,7 @@ ICON_NANOX = icons/nanox_app_celo.gif
 ICON_NANOSP = icons/nanox_app_celo.gif
 ICON_STAX = icons/stax_app_celo.gif
 ICON_FLEX = icons/flex_app_celo.gif
+ICON_APEX_P = icons/apex_p_app_celo.png
 
 # Application allowed derivation curves.
 # Possibles curves are: secp256k1, secp256r1, ed25519 and bls12381g1
@@ -87,6 +88,10 @@ ENABLE_NBGL_QRCODE = 1
 #ENABLE_NBGL_KEYBOARD = 1
 #ENABLE_NBGL_KEYPAD = 1
 
+########################################
+#            Swap features             #
+########################################
+ENABLE_SWAP = 1
 
 ########################################
 #          Features disablers          #
@@ -109,6 +114,10 @@ ifneq ($(DEBUG), 0)
     ifneq ($(MEMORY_PROFILING),0)
         DEFINES += HAVE_MEMORY_PROFILING
     endif
+endif
+
+ifneq ($(NOCONSENT),)
+DEFINES += NO_CONSENT
 endif
 
 include $(BOLOS_SDK)/Makefile.standard_app

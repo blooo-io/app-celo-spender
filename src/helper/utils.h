@@ -275,3 +275,5 @@ bool max_transaction_fee_to_string(const txInt256_t *BEGasPrice,
                                    uint32_t displayBufferSize);
 
 bool is_celo_native_address(const uint8_t *addr);
+
+int _strcasecmp(const char *s1, const char *s2);

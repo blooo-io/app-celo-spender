@@ -10,6 +10,11 @@
 #include "manage_asset_info.h"
 #include "cmd_tx_info.h"
 
+#ifdef HAVE_SWAP
+#include "swap_utils.h"
+#include "handle_copy_transaction_parameters.h"
+#endif  // HAVE_SWAP
+
 #include <string.h>
 
 static const uint8_t TOKEN_TRANSFER_ID[] = {0xa9, 0x05, 0x9c, 0xbb};
@@ -598,49 +603,86 @@ void finalizeParsing(bool direct, bool use_standard_ui) {
 
     // start display only if the standard ui is used
     if (use_standard_ui) {
-#ifdef NO_CONSENT
-        io_seproxyhal_touch_tx_ok(NULL);
-#else   // NO_CONSENT
-        switch (provisionType) {
-            case PROVISION_LOCK:
-            case PROVISION_UNLOCK:
-                ui_approval_celo_lock_unlock_flow();
-                break;
-            case PROVISION_WITHDRAW:
-                ui_approval_celo_withdraw_flow();
-                break;
-            case PROVISION_VOTE:
-            case PROVISION_REVOKE:
-                ui_approval_celo_vote_revoke_flow();
-                break;
-            case PROVISION_ACTIVATE:
-                ui_approval_celo_activate_flow();
-                break;
-            case PROVISION_RELOCK:
-                ui_approval_celo_relock_flow();
-                break;
-            case PROVISION_CREATE_ACCOUNT:
-                ui_approval_celo_create_account_flow();
-                break;
-
-            default:
-                if (tmpContent.txContent.gatewayDestinationLength != 0) {
-                    if (dataPresent && !N_storage.contractDetails) {
-                        ui_approval_celo_data_warning_gateway_tx_flow();
-                    } else {
-                        ui_approval_celo_gateway_tx_flow();
-                    }
-                } else {
-                    if (dataPresent && !N_storage.contractDetails) {
-                        ui_approval_celo_data_warning_tx_flow();
-                    } else {
-                        ui_approval_celo_tx_flow();
-                    }
-                }
+#ifdef HAVE_SWAP
+        // If we are in swap context, do not redisplay the message data
+        // Instead, ensure they are identical with what was previously displayed
+        if (G_called_from_swap) {
+            if (G_swap_response_ready) {
+                // Safety against trying to make the app sign multiple TX
+                // This code should never be triggered as the app is supposed to exit after
+                // sending the signed transaction
+                PRINTF("Safety against double signing triggered\n");
+                reset_app_context();
+                io_seproxyhal_send_status(SW_SWAP_CHECKING_FAIL, 0, true, false);
+                os_sched_exit(-1);
+            } else {
+                // We will quit the app after this transaction, whether it succeeds or fails
+                PRINTF("Swap response is ready, the app will quit after the next send\n");
+                // This boolean will make the io_send_sw family instant reply + return to
+                // exchange
+                G_swap_response_ready = true;
+            }
+            if (swap_check_validity()) {
+                PRINTF("Swap response validated\n");
+                io_seproxyhal_touch_tx_ok();
+                swap_finalize_exchange_sign_transaction(true);
+            } else {
+                PRINTF("swap_check_validity failed\n");
+                // Failsafe
+                io_seproxyhal_send_status(SW_SWAP_CHECKING_FAIL, 0, true, false);
+                swap_finalize_exchange_sign_transaction(false);
+            }
+        } else {
+            ui_display_transaction();
         }
-#endif  // NO_CONSENT
+#else
+        ui_display_transaction();
+#endif  // HAVE_SWAP
     } else {
         io_send_sw(SW_OK);
         return;
     }
+}
+
+void ui_display_transaction(void) {
+#ifdef NO_CONSENT
+    io_seproxyhal_touch_tx_ok(void);
+#else   // NO_CONSENT
+    switch (provisionType) {
+        case PROVISION_LOCK:
+        case PROVISION_UNLOCK:
+            ui_approval_celo_lock_unlock_flow();
+            break;
+        case PROVISION_WITHDRAW:
+            ui_approval_celo_withdraw_flow();
+            break;
+        case PROVISION_VOTE:
+        case PROVISION_REVOKE:
+            ui_approval_celo_vote_revoke_flow();
+            break;
+        case PROVISION_ACTIVATE:
+            ui_approval_celo_activate_flow();
+            break;
+        case PROVISION_RELOCK:
+            ui_approval_celo_relock_flow();
+            break;
+        case PROVISION_CREATE_ACCOUNT:
+            ui_approval_celo_create_account_flow();
+            break;
+        default:
+            if (tmpContent.txContent.gatewayDestinationLength != 0) {
+                if (dataPresent && !N_storage.contractDetails) {
+                    ui_approval_celo_data_warning_gateway_tx_flow();
+                } else {
+                    ui_approval_celo_gateway_tx_flow();
+                }
+            } else {
+                if (dataPresent && !N_storage.contractDetails) {
+                    ui_approval_celo_data_warning_tx_flow();
+                } else {
+                    ui_approval_celo_tx_flow();
+                }
+            }
+    }
+#endif  // NO_CONSENT
 }

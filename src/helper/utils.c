@@ -442,3 +442,13 @@ bool is_celo_native_address(const uint8_t *addr) {
         0xE3, 0x39, 0xC5, 0x36, 0x98, 0x9B, 0x89, 0x78, 0xA4, 0x38};
     return memcmp(addr, celo_native_addr, ADDRESS_LENGTH) == 0;
 }
+
+int _strcasecmp(const char *s1, const char *s2) {
+    const unsigned char *p1 = (const unsigned char *) s1;
+    const unsigned char *p2 = (const unsigned char *) s2;
+    int result = 0;
+    if (p1 == p2) return 0;
+    while ((result = toupper(*p1) - toupper(*p2++)) == 0)
+        if (*p1++ == '\0') break;
+    return result;
+}

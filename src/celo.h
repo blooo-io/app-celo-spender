@@ -88,4 +88,9 @@ void initTx(txContext_t *context,
  */
 void finalizeParsing(bool direct, bool use_standard_ui);
 
+/**
+ * @brief Displays the transaction on the user interface.
+ */
+void ui_display_transaction(void);
+
 extern volatile uint8_t appState; /**< The application state. */
