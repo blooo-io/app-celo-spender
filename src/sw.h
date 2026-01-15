@@ -9,10 +9,12 @@
 #define SW_INS_NOT_SUPPORTED     0x6D00
 #define SW_CLA_NOT_SUPPORTED     0x6E00
 #define SW_ERROR_IN_DATA         0x6A80
+#define SW_ERROR_WRONG_ADDRESS   0x6A83
 #define SW_INITIALIZATION_ERROR  0x6990
 #define SW_TX_TYPE_NOT_SUPPORTED 0x6501
 #define SW_NO_APDU_RECEIVED      0x6982
 #define SW_DENY                  0x6985
+#define SW_SWAP_CHECKING_FAIL    0xB00A
 
 // ETH's status words
 #define APDU_NO_RESPONSE                      0x0000

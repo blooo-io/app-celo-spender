@@ -59,10 +59,13 @@
 #define MAX_ASSETS 5
 
 #define ADDRESS_LENGTH          20
+#define ADDRESS_LENGTH_CHAR     41
 #define COLLECTION_NAME_MAX_LEN 70
 
 #define INT256_LENGTH              32
-#define MAX_TICKER_LEN             11  // 10 characters + '\0'
+#define MAX_TICKER_LEN             16
+#define CELO_PRECISION 18
+#define MAX_AMOUNT_STR_LEN 21 // 19 for u64 + 1 for '\0' +1 for '.'
 #define CX_KECCAK_256_SIZE         32
 #define ECDSA_SIGNATURE_MAX_LENGTH 73
 

@@ -26,6 +26,7 @@
 #include "uint256.h"
 #include "types.h"
 #include "celo.h"
+#include "swap_utils.h"
 
 #include "os_io_seproxyhal.h"
 
@@ -66,6 +67,7 @@ uint16_t apdu_response_code;
 const internalStorage_t N_storage_real;
 const chain_config_t *chainConfig;
 
+
 /**
  * Handle APDU command received and send back APDU response using handlers.
  * This follows the new boilerplate architecture pattern.
@@ -78,7 +80,13 @@ void app_main() {
 
     io_init();
 
+#ifdef HAVE_SWAP
+    if (!G_called_from_swap) {
+        ui_idle();
+    }
+#else
     ui_idle();
+#endif  // HAVE_SWAP
 
     app_mem_init();
 

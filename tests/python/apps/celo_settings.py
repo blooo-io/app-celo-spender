@@ -26,6 +26,12 @@ SETTINGS_POSITIONS = {
         SettingID.VERBOSE_EIP712: (1, 420, 130),
         SettingID.BLIND_SIGNING: (1, 420, 270),
     },
+    DeviceType.APEX_P: {
+        SettingID.CONTRACT_DATA: (0, 265, 90),
+        SettingID.DEBUG_DATA: (0, 265, 200),
+        SettingID.VERBOSE_EIP712: (1, 265, 90),
+        SettingID.BLIND_SIGNING: (1, 265, 200),
+    },
 }
 
 
